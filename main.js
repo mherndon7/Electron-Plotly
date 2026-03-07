@@ -60,6 +60,7 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    console.log('All windows closed, quitting app');
     app.quit();
   }
 });

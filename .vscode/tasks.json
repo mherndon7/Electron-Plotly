@@ -49,6 +49,22 @@
       "problemMatcher": []
     },
     {
+      "label": "Build Electron App",
+      "type": "npm",
+      "script": "build-electron",
+      "options": {
+        "env": {
+          "ELECTRON_CACHE": "${workspaceFolder}/caches/electron",
+          "ELECTRON_BUILDER_CACHE": "${workspaceFolder}/caches/electron-builder"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "end ng serve",
       "type": "process",
       "command": ["${command:workbench.action.tasks.terminate}"],

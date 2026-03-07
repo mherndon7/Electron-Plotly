@@ -7,8 +7,33 @@
     "start": "ng serve",
     "start-electron": "electron .",
     "build": "ng build --base-href ./",
+    "build-electron": "electron-builder build --publish never",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
+  },
+  "build": {
+    "appId": "com.electron-plotly.app",
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   },
   "private": true,
   "packageManager": "npm@11.11.0",
@@ -31,6 +56,7 @@
     "@angular/compiler-cli": "^21.2.0",
     "@types/plotly.js-dist-min": "^2.3.4",
     "electron": "^40.8.0",
+    "electron-builder": "^24.13.3",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
