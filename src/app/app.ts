@@ -1,7 +1,5 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
-import * as PlotlyJS from 'plotly.js-dist-min';
 
 @Component({
   selector: 'app-root',
