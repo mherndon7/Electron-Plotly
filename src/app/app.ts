@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
 
 @Component({
@@ -7,7 +7,7 @@ import { PlotlyModule } from 'angular-plotly.js';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
   readonly graph = {
     data: [
       {
@@ -37,4 +37,11 @@ export class App {
       margin: { l: 0, r: 0, b: 0, t: 30 },
     },
   };
+
+  allCookiesString?: string;
+
+  ngOnInit() {
+    this.allCookiesString = document.cookie;
+    console.log('document.cookie string:', this.allCookiesString);
+  }
 }

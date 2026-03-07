@@ -11,12 +11,29 @@ const createWindow = () => {
     height: 900,
   });
 
-  if (args.includes('development')) {
+  if (process.argv.includes('development')) {
     console.log('Developer mode enabled: loading from localhost:4200');
-    app.commandLine.appendSwitch('enable-logging');
-    win.webContents.openDevTools();
+    const url = 'http://localhost:4200';
 
-    win.loadURL('http://localhost:4200');
+    const cookieDetails = {
+      url: url, // The URL to associate the cookie with
+      name: 'session_token',
+      value: 'super_secret_value',
+      secure: true,
+      // httpOnly: true,
+    };
+
+    win.webContents.session.cookies
+      .set(cookieDetails)
+      .then(() => {
+        console.log('Cookie "session_token" set for localhost:4200');
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    win.webContents.openDevTools();
+    win.loadURL(url);
   } else {
     win.loadFile('dist/electron-app/browser/index.html');
   }
@@ -28,6 +45,15 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+
+      session.defaultSession.cookies
+        .get({ url: 'http://localhost:4200' })
+        .then((cookies) => {
+          console.log('Cookies retrieved:', cookies);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   });
 });
