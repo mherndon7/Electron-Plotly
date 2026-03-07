@@ -47,6 +47,16 @@
         "isDefault": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "end ng serve",
+      "type": "process",
+      "command": ["${command:workbench.action.tasks.terminate}"],
+      "presentation": {
+        "panel": "dedicated",
+        "close": true // Close the terminal when the task finishes
+      },
+      "dependsOn": ["npm: start"]
     }
   ]
 }

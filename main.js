@@ -1,12 +1,22 @@
 const { app, BrowserWindow } = require('electron');
 
+args = process.argv;
+
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1400,
+    height: 900,
   });
 
-  win.loadFile('dist/electron-app/browser/index.html');
+  if (args.includes('development')) {
+    console.log('Developer mode enabled: loading from localhost:4200');
+    app.commandLine.appendSwitch('enable-logging');
+    win.webContents.openDevTools();
+
+    win.loadURL('http://localhost:4200');
+  } else {
+    win.loadFile('dist/electron-app/browser/index.html');
+  }
 };
 
 app.whenReady().then(() => {
