@@ -9,6 +9,7 @@ const createWindow = () => {
   const win = new BrowserWindow({
     width: 1400,
     height: 900,
+    autoHideMenuBar: true,
   });
 
   if (process.argv.includes('development')) {
