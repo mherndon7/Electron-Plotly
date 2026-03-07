@@ -1,6 +1,9 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, session } = require('electron');
 
-args = process.argv;
+app.commandLine.appendSwitch('enable-logging');
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('ignore-gpu-blacklist');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
 
 const createWindow = () => {
   const win = new BrowserWindow({
