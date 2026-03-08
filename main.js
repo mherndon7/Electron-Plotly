@@ -1,6 +1,7 @@
 const { app, BrowserWindow, session } = require('electron');
 const log = require('electron-log');
 const path = require('path');
+const spawn = require('child_process').execFile;
 
 // Custom log format to include timestamp and log level
 function logFormat(data) {
@@ -28,6 +29,22 @@ app.commandLine.appendSwitch('enable-logging');
 app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
+
+// Spawn the Python process, passing data as a command-line argument
+const pythonProcess = spawn('python', ['-m', 'server', 'cookies']);
+// const process = spawn('python', ['-m', 'cookies', ' cookies']);
+
+pythonProcess.stdout.on('data', (data) => {
+  log.info(`Python output: ${data.toString()}`);
+});
+
+pythonProcess.stderr.on('data', (data) => {
+  log.error(`Python error: ${data.toString()}`);
+});
+
+pythonProcess.on('close', (code) => {
+  log.info(`Python process exited with code ${code}`);
+});
 
 // Development vs Production URL
 const isDevelopment = process.argv.includes('development');
