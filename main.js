@@ -2,6 +2,7 @@ const { app, BrowserWindow, session } = require('electron');
 const log = require('electron-log');
 const path = require('path');
 
+// Custom log format to include timestamp and log level
 function logFormat(data) {
   const date = new Date();
   const d = date.toISOString().split('T');
@@ -15,61 +16,53 @@ function logFormat(data) {
 }
 
 log.initialize();
+log.transports.file.resolvePathFn = () => path.join(__dirname, 'electron-log.log');
 log.transports.file = 'debug';
 log.transports.console = 'debug';
 log.transports.file.format = logFormat;
 log.transports.console.format = logFormat;
 
-log.transports.file.resolvePathFn = () => path.join(__dirname, 'electron-log.log');
-
 Object.assign(console, log.functions);
 
+// Chrome Flags
 app.commandLine.appendSwitch('enable-logging');
 // app.commandLine.appendSwitch('v', '4');
 app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 
-let mainWindow;
+// Development vs Production URL
+const isDevelopment = process.argv.includes('development');
+let url = isDevelopment ? 'http://localhost:4200' : 'http://localhost:8888';
 
+let mainWindow;
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
-    autoHideMenuBar: true,
+    // autoHideMenuBar: true,
   });
 
-  if (process.argv.includes('development')) {
-    console.log('Developer mode enabled: loading from localhost:4200');
-    const url = 'http://localhost:4200';
+  if (isDevelopment) log.info('Developer mode enabled: loading from localhost:4200');
 
-    const cookieDetails = {
-      url: url, // The URL to associate the cookie with
-      name: 'session_token',
-      value: 'super_secret_value',
-      secure: true,
-      // httpOnly: true,
-    };
+  mainWindow.webContents.openDevTools();
+  mainWindow.loadURL(url);
+  const cookieDetails = {
+    url: url, // The URL to associate the cookie with
+    name: 'session_token',
+    value: 'super_secret_value',
+    secure: true,
+    httpOnly: true,
+  };
 
-    mainWindow.webContents.session.cookies
-      .set(cookieDetails)
-      .then(() => {
-        console.log('Cookie "session_token" set for localhost:4200');
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
-    mainWindow.webContents.openDevTools();
-    mainWindow.loadURL(url);
-  } else {
-    mainWindow.webContents.openDevTools();
-    mainWindow.loadURL('http://localhost:8888');
-  }
-
-  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
-    console.log(message + ' ' + sourceId + ' (' + line + ')');
-  });
+  mainWindow.webContents.session.cookies
+    .set(cookieDetails)
+    .then(() => {
+      log.info(`Cookie "session_token" set for ${url}`);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
   mainWindow.on('closed', function () {
     mainWindow.removeAllListeners('close');
@@ -79,38 +72,37 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   createWindow();
-  log.info('Hello, log');
+  session.defaultSession.cookies
+    .get({ url: url })
+    .then((cookies) => log.info('Cookies retrieved:', cookies))
+    .catch((error) => log.info(error));
 });
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 
   session.defaultSession.cookies
-    .get({ url: 'http://localhost:4200' })
-    .then((cookies) => {
-      console.log('Cookies retrieved:', cookies);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+    .get({ url: url })
+    .then((cookies) => log.info('Cookies retrieved:', cookies))
+    .catch((error) => log.info(error));
 });
 
 app.on('before-quit', () => {
-  console.log('App is about to quit, performing cleanup');
+  log.info('App is about to quit, performing cleanup');
 });
 
 app.on('will-quit', () => {
-  console.log('App is quitting, cleaning up resources');
+  log.info('App is quitting, cleaning up resources');
 });
 
 app.on('quit', () => {
-  console.log('App has quit, exiting process');
+  log.info('App has quit, exiting process');
   app.exit(0);
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    console.log('All windows closed, quitting app');
+    log.info('All windows closed, quitting app');
     app.quit();
   }
 });
