@@ -3,6 +3,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
@@ -15,6 +22,13 @@
       "request": "launch",
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html"
+    },
+    {
+      "name": "Start Server",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server",
+      "console": "integratedTerminal"
     },
     {
       "name": "Renderer",
@@ -60,12 +74,12 @@
     },
     {
       "name": "Electron App + renderer",
-      "configurations": ["Electron App", "Renderer"],
+      "configurations": ["Start Server", "Electron App", "Renderer"],
       "stopAll": true
     },
     {
       "name": "Electron App + renderer (Build)",
-      "configurations": ["Electron App", "Renderer"],
+      "configurations": ["Start Server", "Electron App", "Renderer"],
       "preLaunchTask": "Build Angular App",
       "stopAll": true
     }
