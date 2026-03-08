@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { PlotlyModule } from 'angular-plotly.js';
 
 @Component({
@@ -38,10 +40,21 @@ export class App implements OnInit {
     },
   };
 
+  readonly resource = rxResource({ stream: () => this.retrieveCookie() });
+
   allCookiesString?: string;
+
+  protected readonly http = inject(HttpClient);
 
   ngOnInit() {
     this.allCookiesString = document.cookie;
     console.log('document.cookie string:', this.allCookiesString);
+  }
+
+  private retrieveCookie() {
+    return this.http.get('http://localhost:8888/cookie', {
+      responseType: 'text',
+      withCredentials: true,
+    });
   }
 }

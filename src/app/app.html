@@ -1,7 +1,19 @@
-<section>
-  <div style="margin: 0; display: flex">
-    <h4 style="margin: 0">Document Cookies:</h4>
-    <p style="margin: 0; margin-left: 5px">{{ allCookiesString }}</p>
-  </div>
-  <plotly-plot [data]="graph.data" [layout]="graph.layout"></plotly-plot>
-</section>
+@if (resource.isLoading()) {
+  <p>Loading...</p>
+} @else if (resource.error(); as error) {
+  <p>Error: {{ error.message }}</p>
+}
+@defer (when resource.hasValue()) {
+  <section>
+    <div class="cookie">
+      <h4>Browser Cookies:</h4>
+      <p>{{ allCookiesString }}</p>
+    </div>
+    <div class="cookie">
+      <h4>Server Cookies:</h4>
+      <p>{{ resource.value() }}</p>
+    </div>
+    <button (click)="resource.reload()">Reload Server Cookie</button>
+  </section>
+}
+<plotly-plot [data]="graph.data" [layout]="graph.layout"></plotly-plot>
