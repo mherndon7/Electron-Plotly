@@ -46,3 +46,8 @@ Thumbs.db
 # Electron build output
 /dist-electron
 /caches
+
+
+# Python
+/.venv
+__pycache__/

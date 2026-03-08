@@ -1,0 +1,37 @@
+import asyncio
+from pathlib import Path
+
+import tornado
+from tornado.web import StaticFileHandler
+
+index_file = Path(__file__).parent.parent.parent / "index.html"
+
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, world")
+
+
+def make_app():
+    return tornado.web.Application(
+        [
+            (
+                r"/(.*)",
+                StaticFileHandler,
+                {
+                    "path": index_file.parent,
+                    "default_filename": index_file.name,
+                },
+            ),
+        ],
+    )
+
+
+async def main():
+    app = make_app()
+    app.listen(8888)
+    await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
