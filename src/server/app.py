@@ -1,4 +1,5 @@
 import asyncio
+from calendar import c
 from pathlib import Path
 
 import tornado
@@ -21,15 +22,22 @@ class CookieHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Credentials", "true")
 
     def get(self):
-        # self.write("This is the cookie handler. Check the console for cookie details.")
-        print(self.get_secure_cookie("session_token"))
-        if not self.get_cookie("session_token"):
-            self.set_cookie("session_token", "manually_set_token")
-            self.write("Your session token was not set yet!")
+        cookie_name = self.application.settings.get("cookie_name", None)
+        cookie_value = self.application.settings.get("cookie_value", None)
+
+        if cookie_name and cookie_value:
+            cookie = self.get_cookie(cookie_name)
+            if cookie and cookie == cookie_value:
+                self.write(f"Cookie '{cookie_name}' found with value: {cookie}")
+            elif cookie:
+                self.write(
+                    f"Cookie '{cookie_name}' found but value mismatch. "
+                    f"Expected: {cookie_value}, Got: {cookie}"
+                )
+            else:
+                self.write(f"Cookie '{cookie_name}' not found.")
         else:
-            self.write(
-                f"Your session token was set! Value: {self.get_cookie('session_token')}"
-            )
+            self.write("No cookie name or value configured in application settings.")
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
@@ -44,9 +52,20 @@ class StaticFileHandler(tornado.web.StaticFileHandler):
     # print("Cookie:", self.get_secure_cookie("session_token"))
 
 
-def make_app():
-    return tornado.web.Application(
-        [
+class ServerApplication(tornado.web.Application):
+    def __init__(self, cookie_name: str, cookie_value: str):
+        self.cookie_name = cookie_name
+        self.cookie_value = cookie_value
+
+        super().__init__(
+            self._handlers(),
+            cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
+            cookie_name=cookie_name,
+            cookie_value=cookie_value,
+        )
+
+    def _handlers(self):
+        return [
             (r"/cookie", CookieHandler),
             (
                 r"/(.*)",
@@ -56,12 +75,10 @@ def make_app():
                     "default_filename": index_file.name,
                 },
             ),
-        ],
-        cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
-    )
+        ]
 
 
-async def start_server():
-    app = make_app()
+async def start_server(cookie_name: str, cookie_value: str):
+    app = ServerApplication(cookie_name, cookie_value)
     app.listen(8888)
     await asyncio.Event().wait()

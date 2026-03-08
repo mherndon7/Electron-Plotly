@@ -24,11 +24,25 @@
       "url": "http://localhost:9876/debug.html"
     },
     {
+      "name": "Start Server: Development",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server",
+      "args": ["server", "--dev"],
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Start Server",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/src/server",
-      "args": ["server"],
+      "args": [
+        "server",
+        "--cookie-name",
+        "session_token",
+        "--cookie-value",
+        "super_secret_server_value"
+      ],
       "console": "integratedTerminal"
     },
     {
@@ -70,7 +84,7 @@
   "compounds": [
     {
       "name": "Electron App + renderer (Development)",
-      "configurations": ["Start Server", "Electron App: Development", "Renderer"],
+      "configurations": ["Start Server: Development", "Electron App: Development", "Renderer"],
       "stopAll": true
     },
     {
