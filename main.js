@@ -64,7 +64,7 @@ const createWindow = () => {
     mainWindow.loadURL(url);
   } else {
     mainWindow.webContents.openDevTools();
-    mainWindow.loadFile('dist/electron-app/browser/index.html');
+    mainWindow.loadURL('http://localhost:8888');
   }
 
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
