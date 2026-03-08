@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 import tornado
@@ -58,3 +59,9 @@ def make_app():
         ],
         cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
     )
+
+
+async def start_server():
+    app = make_app()
+    app.listen(8888)
+    await asyncio.Event().wait()
