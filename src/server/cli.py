@@ -11,7 +11,7 @@ def cli():
 
 
 @cli.command()
-def cookies():
+def generate_cookie():
     click.echo("session_token::super_secret_server_value")
 
 

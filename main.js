@@ -37,7 +37,7 @@ let url = isDevelopment ? 'http://localhost:4200' : 'http://localhost:8888';
 const startApp = () => {
   log.info('Starting Electron app');
   // Spawn the Python process, passing data as a command-line argument
-  const pythonProcess = spawn('python', ['-m', 'server', 'cookies']);
+  const pythonProcess = spawn('python', ['-m', 'server', 'generate-cookie']);
 
   pythonProcess.stdout.on('data', (data) => {
     output = data.toString().trim();
