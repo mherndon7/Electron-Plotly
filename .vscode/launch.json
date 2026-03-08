@@ -69,7 +69,7 @@
   "compounds": [
     {
       "name": "Electron App + renderer (Development)",
-      "configurations": ["Electron App: Development", "Renderer"],
+      "configurations": ["Start Server", "Electron App: Development", "Renderer"],
       "stopAll": true
     },
     {
