@@ -17,8 +17,6 @@ function logFormat(data) {
 
 log.initialize();
 log.transports.file.resolvePathFn = () => path.join(__dirname, 'electron-log.log');
-log.transports.file = 'debug';
-log.transports.console = 'debug';
 log.transports.file.format = logFormat;
 log.transports.console.format = logFormat;
 
