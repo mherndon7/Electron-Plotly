@@ -30,28 +30,39 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 
-// Spawn the Python process, passing data as a command-line argument
-const pythonProcess = spawn('python', ['-m', 'server', 'cookies']);
-// const process = spawn('python', ['-m', 'cookies', ' cookies']);
-
-pythonProcess.stdout.on('data', (data) => {
-  log.info(`Python output: ${data.toString()}`);
-});
-
-pythonProcess.stderr.on('data', (data) => {
-  log.error(`Python error: ${data.toString()}`);
-});
-
-pythonProcess.on('close', (code) => {
-  log.info(`Python process exited with code ${code}`);
-});
-
 // Development vs Production URL
 const isDevelopment = process.argv.includes('development');
 let url = isDevelopment ? 'http://localhost:4200' : 'http://localhost:8888';
 
+const startApp = () => {
+  log.info('Starting Electron app');
+  // Spawn the Python process, passing data as a command-line argument
+  const pythonProcess = spawn('python', ['-m', 'server', 'cookies']);
+
+  pythonProcess.stdout.on('data', (data) => {
+    output = data.toString().trim();
+    log.info(`Python output: ${output}`);
+
+    // Split the value to extract the cookie name and value
+    const [name, cookieValue] = output.split('::');
+    createWindow(name, cookieValue);
+    session.defaultSession.cookies
+      .get({ url: url })
+      .then((cookies) => log.info('Cookies retrieved:', cookies))
+      .catch((error) => log.info(error));
+  });
+
+  pythonProcess.stderr.on('data', (data) => {
+    log.error(`Python error: ${data.toString()}`);
+  });
+
+  pythonProcess.on('close', (code) => {
+    log.info(`Python process exited with code ${code}`);
+  });
+};
+
 let mainWindow;
-const createWindow = () => {
+const createWindow = (name, value) => {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -64,42 +75,25 @@ const createWindow = () => {
   mainWindow.loadURL(url);
   const cookieDetails = {
     url: url, // The URL to associate the cookie with
-    name: 'session_token',
-    value: 'super_secret_value',
+    name: name,
+    value: value,
     secure: true,
     httpOnly: true,
   };
 
   mainWindow.webContents.session.cookies
     .set(cookieDetails)
-    .then(() => {
-      log.info(`Cookie "session_token" set for ${url}`);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    .then(() => log.info(`Cookie "${name}" set for ${url}`))
+    .catch((error) => console.error(error));
 
-  mainWindow.on('closed', function () {
+  mainWindow.on('closed', () => {
     mainWindow.removeAllListeners('close');
     mainWindow = null;
   });
 };
 
 app.whenReady().then(() => {
-  createWindow();
-  session.defaultSession.cookies
-    .get({ url: url })
-    .then((cookies) => log.info('Cookies retrieved:', cookies))
-    .catch((error) => log.info(error));
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-
-  session.defaultSession.cookies
-    .get({ url: url })
-    .then((cookies) => log.info('Cookies retrieved:', cookies))
-    .catch((error) => log.info(error));
+  startApp();
 });
 
 app.on('before-quit', () => {

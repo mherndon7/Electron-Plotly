@@ -12,7 +12,7 @@ def cli():
 
 @cli.command()
 def cookies():
-    click.echo("super_secret_value")
+    click.echo("session_token::super_secret_server_value")
 
 
 @cli.command()
