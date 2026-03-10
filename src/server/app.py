@@ -1,5 +1,4 @@
 import asyncio
-from calendar import c
 from pathlib import Path
 
 import tornado
