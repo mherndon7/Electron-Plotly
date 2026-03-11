@@ -3,6 +3,7 @@ from pathlib import Path
 
 import tornado
 
+
 from .handlers import CookieHandler, StaticFileHandler
 
 index_file = (
@@ -15,16 +16,19 @@ index_file = (
 
 
 class ServerApplication(tornado.web.Application):
-    def __init__(self, cookie_name: str, cookie_value: str):
+    def __init__(
+        self,
+        cookie_name: str,
+        cookie_value: str,
+        user_secret: str,
+        private_pem: bytes,
+    ):
         self.cookie_name = cookie_name
         self.cookie_value = cookie_value
+        self.cookie_secret = user_secret
+        self.private_pem = private_pem
 
-        super().__init__(
-            self._handlers(),
-            cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
-            cookie_name=cookie_name,
-            cookie_value=cookie_value,
-        )
+        super().__init__(self._handlers(), cookie_secret=user_secret)
 
     def _handlers(self):
         return [
@@ -40,7 +44,12 @@ class ServerApplication(tornado.web.Application):
         ]
 
 
-async def start_server(cookie_name: str, cookie_value: str):
-    app = ServerApplication(cookie_name, cookie_value)
+async def start_server(
+    cookie_name: str,
+    cookie_value: str,
+    cookie_secret: str,
+    private_pem: bytes,
+):
+    app = ServerApplication(cookie_name, cookie_value, cookie_secret, private_pem)
     app.listen(8888)
     await asyncio.Event().wait()
