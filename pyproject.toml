@@ -3,17 +3,10 @@ name = "server"
 version = "0.0.0"
 description = "Project for setting up an angular project that renders plotly with WebGl on a tornado web server and loaded into an electron application"
 requires-python = ">=3.13"
-dependencies = [
-    "click>=8.3.1",
-    "cryptography>=46.0.5",
-    "ruff>=0.15.5",
-    "tornado>=6.5.4",
-]
+dependencies = ["click>=8.3.1", "cryptography>=46.0.5", "tornado>=6.5.4"]
 
 [project.optional-dependencies]
-support = [
- "mypy>=1.19.1",
-]
+support = ["mypy>=1.19.1", "ruff>=0.15.5"]
 
 [build-system]
 requires = ["hatchling"]
