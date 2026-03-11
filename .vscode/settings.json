@@ -1,0 +1,70 @@
+{
+  "editor.formatOnSave": true,
+  "prettier.singleQuote": true,
+  "terminal.explorerKind": "external",
+  "python.analysis.typeCheckingMode": "basic",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.mypy_cache": true,
+    "**/.angular": true,
+    "**/**.pyc": true,
+    "**/.idea": true,
+    "**/_internal": true,
+    "**/serverBuild": true,
+    "**/*egg-info": true
+  },
+  "files.watcherExclude": {
+    "**/caches*": true,
+    "**/dist*": true,
+    "**/node_modules*/*/**": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[matlab]": { "editor.defaultFormatter": "AffenWiesel.matlab-formatter" },
+  "typescript.suggest.completeFunctionCalls": true,
+  "javascript.suggest.completeFunctionCalls": true,
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always"
+  },
+  "editor.rulers": [100],
+  "gitlens.views.branches.avatars": false,
+  "gitlens.menus": false,
+  "git.autofetch": true,
+  "git.pruneOnFetch": true,
+  "git-graph.dialog.fetchRemote.prune": false,
+  "git-graph.repository.fetchAndPrune": true,
+  "yaml.customTags": ["!reference sequence"],
+  "pylint.importStrategy": "fromEnvironment",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "[python]": {
+    "editor.rulers": [88],
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.unusedImports": "always"
+    }
+  },
+  "isort.args": ["--profile", "black"],
+  "flake8.args": ["--ignore=E203,W503", "--max-line-length=88"],
+  "python.testing.pytestArgs": ["backend/tests", "-s", "--color=yes"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "jupyter.debugJustMyCode": true,
+  "autoDocstring.docstringFormat": "numpy",
+  "auto-close-tag.enableAutoCloseTag": false
+}
