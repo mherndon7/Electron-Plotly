@@ -3,7 +3,6 @@ from pathlib import Path
 
 import tornado
 
-
 from .handlers import CookieHandler, StaticFileHandler
 
 index_file = (
@@ -22,11 +21,13 @@ class ServerApplication(tornado.web.Application):
         cookie_value: str,
         user_secret: str,
         private_pem: bytes,
+        developer_mode: bool = False,
     ):
         self.cookie_name = cookie_name
         self.cookie_value = cookie_value
         self.cookie_secret = user_secret
         self.private_pem = private_pem
+        self.developer_mode = developer_mode
 
         super().__init__(self._handlers(), cookie_secret=user_secret)
 
@@ -49,7 +50,14 @@ async def start_server(
     cookie_value: str,
     cookie_secret: str,
     private_pem: bytes,
+    developer_mode: bool = False,
 ):
-    app = ServerApplication(cookie_name, cookie_value, cookie_secret, private_pem)
+    app = ServerApplication(
+        cookie_name,
+        cookie_value,
+        cookie_secret,
+        private_pem,
+        developer_mode,
+    )
     app.listen(8888)
     await asyncio.Event().wait()

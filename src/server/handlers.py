@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Awaitable, cast
 
 import tornado
 from tornado.httputil import HTTPServerRequest
+
+from .authentication import authenticate
 
 if TYPE_CHECKING:
     from .app import ServerApplication
@@ -19,6 +21,13 @@ class BaseHandler(tornado.web.RequestHandler):
         super().__init__(application, request, **kwargs)
         self.application = cast("ServerApplication", self.application)
 
+    def get_current_user(self):
+        return authenticate(self)
+
+    def prepare(self) -> Awaitable[None] | None:
+        authenticate(self)
+        return super().prepare()
+
 
 class CookieHandler(BaseHandler):
     def set_default_headers(self) -> None:
@@ -28,6 +37,8 @@ class CookieHandler(BaseHandler):
         self.set_header("Access-Control-Allow-Credentials", "true")
 
     def get(self):
+        print(f"Current user: {self.current_user}")
+
         cookie_name = self.application.cookie_name
         cookie_value = self.application.cookie_value
 

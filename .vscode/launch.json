@@ -36,7 +36,7 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/src/server",
-      "args": ["server", "--cookie-secret", "super_secret_server_value"],
+      "args": ["server"],
       "console": "integratedTerminal"
     },
     {
@@ -83,12 +83,12 @@
     },
     {
       "name": "Electron App + renderer",
-      "configurations": ["Start Server", "Electron App", "Renderer"],
+      "configurations": ["Electron App", "Renderer"],
       "stopAll": true
     },
     {
       "name": "Electron App + renderer (Build)",
-      "configurations": ["Start Server", "Electron App", "Renderer"],
+      "configurations": ["Electron App", "Renderer"],
       "preLaunchTask": "Build Angular App",
       "stopAll": true
     }

@@ -34,33 +34,42 @@ app.commandLine.appendSwitch('enable-gpu-rasterization');
 const isDevelopment = process.argv.includes('development');
 let url = isDevelopment ? 'http://localhost:4200' : 'http://localhost:8888';
 
+let serverProcess;
 const startApp = () => {
   log.info('Starting Electron app');
-  // Spawn the Python process, passing data as a command-line argument
-  const args = ['-m', 'server', 'generate-cookie'];
-  if (isDevelopment) {
-    args.push('--dev');
-  }
-  const pythonProcess = spawn('python', args);
 
-  pythonProcess.stdout.on('data', (data) => {
+  if (!isDevelopment) {
+    createWindow();
+    return;
+  }
+
+  // Spawn the Python process, passing data as a command-line argument
+  const args = ['-m', 'server', 'server'];
+  serverProcess = spawn('python', args);
+
+  serverProcess.stdout.on('data', (data) => {
     output = data.toString().trim();
     log.info(`Python output: ${output}`);
 
     // Split the value to extract the cookie name and value
-    const [name, cookieValue] = output.split('::');
-    createWindow(name, cookieValue);
-    session.defaultSession.cookies
-      .get({ url: url })
-      .then((cookies) => log.info('Cookies retrieved:', cookies))
-      .catch((error) => log.info(error));
+    const cookieRegex = /^Cookie::(?<cookie_name>[^:]+)::(?<cookie_value>.*)$/gm;
+    const match = cookieRegex.exec(output);
+    if (match) {
+      log.debug(`Cookie Name: ${match.groups.cookie_name}`);
+      log.debug(`Cookie Value: ${match.groups.cookie_value}`);
+      createWindow(match.groups.cookie_name, match.groups.cookie_value);
+      session.defaultSession.cookies
+        .get({ url: url })
+        .then((cookies) => log.info('Cookies retrieved:', cookies))
+        .catch((error) => log.info(error));
+    }
   });
 
-  pythonProcess.stderr.on('data', (data) => {
+  serverProcess.stderr.on('data', (data) => {
     log.error(`Python error: ${data.toString()}`);
   });
 
-  pythonProcess.on('close', (code) => {
+  serverProcess.on('close', (code) => {
     log.info(`Python process exited with code ${code}`);
   });
 };
@@ -77,18 +86,21 @@ const createWindow = (name, value) => {
 
   mainWindow.webContents.openDevTools();
   mainWindow.loadURL(url);
-  const cookieDetails = {
-    url: url, // The URL to associate the cookie with
-    name: name,
-    value: value,
-    secure: true,
-    httpOnly: true,
-  };
 
-  mainWindow.webContents.session.cookies
-    .set(cookieDetails)
-    .then(() => log.info(`Cookie "${name}" set for ${url}`))
-    .catch((error) => console.error(error));
+  if (name && value) {
+    const cookieDetails = {
+      url: url, // The URL to associate the cookie with
+      name: name,
+      value: value,
+      secure: true,
+      httpOnly: true,
+    };
+
+    mainWindow.webContents.session.cookies
+      .set(cookieDetails)
+      .then(() => log.info(`Cookie "${name}" set for ${url}`))
+      .catch((error) => console.error(error));
+  }
 
   mainWindow.on('closed', () => {
     mainWindow.removeAllListeners('close');
@@ -102,6 +114,7 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   log.info('App is about to quit, performing cleanup');
+  if (serverProcess) serverProcess.kill();
 });
 
 app.on('will-quit', () => {

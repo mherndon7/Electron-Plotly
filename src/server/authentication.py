@@ -81,6 +81,11 @@ def authenticate(self: BaseHandler) -> str:
 
         # Split the user and signature out
         user, sig64 = f"{cookie_data}=".split("|", 1)
+
+        # Skip verification in developer mode
+        if self.application.developer_mode:
+            return user
+
         public_key.verify(
             signature=base64.b64decode(sig64),
             data=self.application.cookie_secret.encode("utf-8"),
