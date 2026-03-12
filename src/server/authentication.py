@@ -69,7 +69,13 @@ def get_signed_cookie(
 
 
 def authenticate(self: BaseHandler) -> str:
-    cookie_data = self.get_cookie(self.application.cookie_name)
+
+    cookie_data = (
+        get_signed_cookie(self.application.private_pem, self.application.cookie_secret)
+        if self.application.developer_mode  # Skip verification in developer mode
+        else self.get_cookie(self.application.cookie_name)
+    )
+
     if cookie_data is None:
         raise HTTPError(401, "No cookie provided")
 
@@ -81,10 +87,6 @@ def authenticate(self: BaseHandler) -> str:
 
         # Split the user and signature out
         user, sig64 = f"{cookie_data}=".split("|", 1)
-
-        # Skip verification in developer mode
-        if self.application.developer_mode:
-            return user
 
         public_key.verify(
             signature=base64.b64decode(sig64),
