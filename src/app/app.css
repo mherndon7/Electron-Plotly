@@ -7,6 +7,10 @@
   margin: 0;
 }
 
+.cookie > h4 {
+  white-space: nowrap;
+}
+
 .cookie > p {
   margin-left: 5px;
 }

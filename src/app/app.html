@@ -1,20 +1,18 @@
-@if (resource.isLoading()) {
-  <p>Loading...</p>
-} @else if (resource.error(); as error) {
-  <p>Error: {{ error.message }}</p>
-}
-
 <div class="cookie">
   <h4>Browser Cookies:</h4>
   <p>{{ allCookiesString }}</p>
 </div>
-@defer (when resource.hasValue()) {
-  <section>
-    <div class="cookie">
-      <h4>Server Cookies:</h4>
+<section>
+  <div class="cookie">
+    <h4>Server Cookies:</h4>
+    @if (resource.isLoading()) {
+      <p>Loading...</p>
+    } @else if (resource.hasValue()) {
       <p>{{ resource.value() }}</p>
-    </div>
-    <button (click)="resource.reload()">Reload Server Cookie</button>
-  </section>
-}
+    } @else if (resource.error(); as error) {
+      <p>Error: {{ error.message }}</p>
+    }
+  </div>
+  <button (click)="resource.reload()">Reload Server Cookie</button>
+</section>
 <plotly-plot [data]="graph.data" [layout]="graph.layout"></plotly-plot>
