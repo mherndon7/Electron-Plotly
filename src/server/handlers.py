@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Awaitable, cast
 
 import tornado
@@ -9,6 +10,8 @@ from .authentication import authenticate
 
 if TYPE_CHECKING:
     from .app import ServerApplication
+
+logger = logging.getLogger(__name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -26,6 +29,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def prepare(self) -> Awaitable[None] | None:
         authenticate(self)
+        logger.debug("Authenticated!")
         return super().prepare()
 
 
@@ -37,7 +41,7 @@ class CookieHandler(BaseHandler):
         self.set_header("Access-Control-Allow-Credentials", "true")
 
     def get(self):
-        print(f"Current user: {self.current_user}")
+        logger.debug(f"Current user: {self.current_user}")
 
         cookie_name = self.application.cookie_name
         cookie_value = self.application.cookie_value

@@ -1,9 +1,15 @@
 import asyncio
+import logging
 from pathlib import Path
 
 import tornado
 
+from server.log import setup_module_logger
+
 from .handlers import CookieHandler, StaticFileHandler
+
+logger = logging.getLogger(__name__)
+
 
 index_file = (
     Path(__file__).parent.parent.parent
@@ -52,6 +58,7 @@ async def start_server(
     private_pem: bytes,
     developer_mode: bool = False,
 ):
+    setup_module_logger("server", Path(__file__).parent)
     app = ServerApplication(
         cookie_name,
         cookie_value,
@@ -59,5 +66,8 @@ async def start_server(
         private_pem,
         developer_mode,
     )
+
+    logger.info("Listening on port 8888...")
     app.listen(8888)
+
     await asyncio.Event().wait()
