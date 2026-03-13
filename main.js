@@ -32,17 +32,14 @@ app.commandLine.appendSwitch('enable-gpu-rasterization');
 
 // Development vs Production URL
 const isDevelopment = process.argv.includes('development');
-let url = isDevelopment ? 'http://localhost:4200' : 'http://localhost:8888';
+let port = isDevelopment ? 4200 : 8080;
+const createUrl = () => `http://localhost:${port}`;
 
+let cookieMatch;
+let portMatch;
 let serverProcess;
-const startApp = () => {
-  log.info('Starting Electron app');
 
-  if (!isDevelopment) {
-    createWindow();
-    return;
-  }
-
+const startScript = () => {
   // Spawn the Python process, passing data as a command-line argument
   const args = ['-m', 'server', 'server'];
   serverProcess = spawn('python', args);
@@ -53,25 +50,44 @@ const startApp = () => {
 
     // Split the value to extract the cookie name and value
     const cookieRegex = /^Cookie::(?<cookie_name>[^:]+)::(?<cookie_value>.*)$/gm;
-    const match = cookieRegex.exec(output);
-    if (match) {
-      log.debug(`Cookie Name: ${match.groups.cookie_name}`);
-      log.debug(`Cookie Value: ${match.groups.cookie_value}`);
-      createWindow(match.groups.cookie_name, match.groups.cookie_value);
-      session.defaultSession.cookies
-        .get({ url: url })
-        .then((cookies) => log.info('Cookies retrieved:', cookies))
-        .catch((error) => log.info(error));
-    }
+    cookieMatch = cookieMatch ?? cookieRegex.exec(output);
+
+    startApp();
   });
 
   serverProcess.stderr.on('data', (data) => {
-    log.error(`Python error: ${data.toString()}`);
+    output = data.toString().trim();
+    log.error(`Python error: ${output}`);
+
+    // Find the port the server is listening on
+    const portRegex = /^.*?Listening on port (?<port>\d+)\.\.\./;
+    portMatch = portMatch ?? portRegex.exec(output);
+    startApp();
   });
 
   serverProcess.on('close', (code) => {
     log.info(`Python process exited with code ${code}`);
   });
+};
+
+const startApp = () => {
+  if ((isDevelopment && !cookieMatch) || !portMatch || BrowserWindow.getAllWindows().length > 0)
+    return;
+
+  log.debug(`Cookie Name: ${cookieMatch.groups.cookie_name}`);
+  log.debug(`Cookie Value: ${cookieMatch.groups.cookie_value}`);
+  port = portMatch.groups.port;
+
+  // Create window without cookies and server in development mode
+  if (isDevelopment) createWindow();
+  else {
+    createWindow(cookieMatch.groups.cookie_name, cookieMatch.groups.cookie_value);
+
+    session.defaultSession.cookies
+      .get({ url: createUrl() })
+      .then((cookies) => log.info('Cookies retrieved:', cookies))
+      .catch((error) => log.info(error));
+  }
 };
 
 let mainWindow;
@@ -84,6 +100,8 @@ const createWindow = (name, value) => {
 
   if (isDevelopment) log.info('Developer mode enabled: loading from localhost:4200');
 
+  const url = createUrl();
+  log.debug(`Loading URL ${url}...`);
   mainWindow.webContents.openDevTools();
   mainWindow.loadURL(url);
 
@@ -109,7 +127,8 @@ const createWindow = (name, value) => {
 };
 
 app.whenReady().then(() => {
-  startApp();
+  log.info('Starting Electron app');
+  startScript();
 });
 
 app.on('before-quit', () => {
