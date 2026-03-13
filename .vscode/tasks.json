@@ -49,6 +49,22 @@
       "problemMatcher": []
     },
     {
+      "label": "Build Server",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "PyInstaller",
+        "deployment\\ElectronServer.spec",
+        "--distpath",
+        "deployment",
+        "--workpath",
+        "deployment/serverBuild",
+        "--noconfirm"
+      ],
+      "dependsOn": ["Delete Server Build"]
+    },
+    {
       "label": "Build Electron App",
       "type": "npm",
       "script": "build-electron",
@@ -63,6 +79,11 @@
         "isDefault": false
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Delete Server Build",
+      "type": "shell",
+      "command": "IF EXIST ${workspaceFolder}\\deployment\\ElectronServer RD /s /q ${workspaceFolder}\\deployment\\ElectronServer"
     },
     {
       "label": "end ng serve",

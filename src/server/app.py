@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from pathlib import Path
 
 import tornado
@@ -11,13 +12,32 @@ from .handlers import CookieHandler, StaticFileHandler
 logger = logging.getLogger(__name__)
 
 
-index_file = (
-    Path(__file__).parent.parent.parent
-    / "dist"
-    / "electron-app"
-    / "browser"
-    / "index.html"
-)
+def get_log_path() -> Path:
+    """Path for the server log file."""
+    return (
+        Path(sys.executable).parent
+        if getattr(sys, "frozen", False)
+        else Path(__file__).parent.parent.parent
+    )
+
+
+def get_index_path() -> Path:
+    """Path to the deployed `index.html` file."""
+    return (
+        Path(sys.executable).parent.parent
+        / "dist"
+        / "electron-app"
+        / "browser"
+        / "index.html"
+        if getattr(sys, "frozen", False)
+        else (
+            Path(__file__).parent.parent.parent
+            / "dist"
+            / "electron-app"
+            / "browser"
+            / "index.html"
+        )
+    )
 
 
 class ServerApplication(tornado.web.Application):
@@ -38,6 +58,7 @@ class ServerApplication(tornado.web.Application):
         super().__init__(self._handlers(), cookie_secret=user_secret)
 
     def _handlers(self):
+        index_file = get_index_path()
         return [
             (r"/cookie", CookieHandler),
             (
@@ -58,7 +79,7 @@ async def start_server(
     private_pem: bytes,
     developer_mode: bool = False,
 ):
-    setup_module_logger("server", Path(__file__).parent)
+    setup_module_logger("server", get_log_path())
     app = ServerApplication(
         cookie_name,
         cookie_value,

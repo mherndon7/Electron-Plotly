@@ -1,4 +1,6 @@
 import mimetypes
+import sys
+from multiprocessing import freeze_support
 
 from server.cli import cli
 
@@ -8,4 +10,8 @@ mimetypes.add_type("application/javascript", ".js", True)
 mimetypes.add_type("text/javascript", ".js", True)
 
 if __name__ == "__main__":
+    # Required for pyinstaller
+    if getattr(sys, "frozen", False):
+        freeze_support()
+
     cli()

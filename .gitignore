@@ -51,3 +51,5 @@ Thumbs.db
 # Python
 /.venv
 __pycache__/
+deployment/*
+!deployment/ElectronServer.spec
