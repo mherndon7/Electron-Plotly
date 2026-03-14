@@ -1,8 +1,7 @@
 const { app, BrowserWindow, session } = require('electron');
 const log = require('electron-log');
 const path = require('path');
-const spawn = require('child_process').execFile;
-const find = require('find-process');
+const childProcess = require('child_process');
 
 // Launch server from python script
 const useScript = process.argv.includes('script');
@@ -49,7 +48,7 @@ let serverProcess;
 
 const startServer = () => {
   if (useScript) {
-    serverProcess = spawn('python', ['-m', 'server', 'server']);
+    serverProcess = childProcess.execFile('python', ['-m', 'server', 'server']);
   } else {
     let exePath;
     if (electronIsDev) {
@@ -58,7 +57,7 @@ const startServer = () => {
       exePath = path.join(app.getAppPath(), '..', '..', 'extras', 'ElectronServer.exe');
     }
     log.debug(`Executable Path: ${exePath}`);
-    serverProcess = spawn(exePath, ['server']);
+    serverProcess = childProcess.execFile(exePath, ['server']);
   }
 
   serverProcess.stdout.on('data', (data) => {
@@ -147,15 +146,16 @@ app.whenReady().then(() => {
 });
 
 app.on('before-quit', async () => {
-  log.info('App is about to quit, performing cleanup');
-  if (serverProcess) serverProcess.kill();
+  try {
+    log.info('App is about to quit, performing cleanup');
+    if (serverProcess) serverProcess.kill();
 
-  if (!useScript) {
-    const processes = await find('name', 'ElectronServer');
-    processes.forEach((proc) => {
-      log.debug(`Killing process ${proc.pid}`);
-      process.kill(proc.pid);
-    });
+    if (!useScript) {
+      log.debug(`Killing server processes...`);
+      killProcess('ElectronServer');
+    }
+  } catch (error) {
+    log.error('Error in handleData:', error);
   }
 });
 
@@ -165,7 +165,6 @@ app.on('will-quit', () => {
 
 app.on('quit', () => {
   log.info('App has quit, exiting process');
-  app.exit(0);
 });
 
 app.on('window-all-closed', () => {
@@ -174,3 +173,14 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+function killProcess(name) {
+  switch (process.platform) {
+    case 'win32':
+      childProcess.exec(`taskkill /F /IM ' ${name}.exe /T`);
+      break;
+    default: //Linux + Darwin
+      childProcess.exec(`pkill -f ${name}`);
+      break;
+  }
+}

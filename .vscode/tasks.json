@@ -82,7 +82,8 @@
         "kind": "build",
         "isDefault": false
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "dependsOn": "Delete App Build"
     },
     {
       "label": "Delete Server Build",
@@ -111,7 +112,7 @@
         "kind": "build",
         "isDefault": true
       },
-      "dependsOn": ["Build Angular App", "Build Server", "Delete App Build", "Build Electron App"]
+      "dependsOn": ["Build Angular App", "Build Server", "Build Electron App"]
     }
   ]
 }
