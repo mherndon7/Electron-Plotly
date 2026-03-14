@@ -47,7 +47,20 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Electron App",
+      "name": "Electron App: Script",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
+      },
+      "args": [".", "--remote-debugging-port=9222", "script"],
+      "outputCapture": "std",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Electron App: Server Executable",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -77,18 +90,29 @@
   ],
   "compounds": [
     {
-      "name": "Electron App + renderer (Development)",
+      "name": "Electron App + Renderer: Development",
       "configurations": ["Start Server: Development", "Electron App: Development", "Renderer"],
       "stopAll": true
     },
     {
-      "name": "Electron App + renderer",
-      "configurations": ["Electron App", "Renderer"],
+      "name": "Electron App + Renderer: Script",
+      "configurations": ["Electron App: Script", "Renderer"],
       "stopAll": true
     },
     {
-      "name": "Electron App + renderer (Build)",
-      "configurations": ["Electron App", "Renderer"],
+      "name": "Electron App + Renderer: Script (Build Angular)",
+      "configurations": ["Electron App: Script", "Renderer"],
+      "preLaunchTask": "Build Angular App",
+      "stopAll": true
+    },
+    {
+      "name": "Electron App + Renderer: Server Executable",
+      "configurations": ["Electron App: Server Executable", "Renderer"],
+      "stopAll": true
+    },
+    {
+      "name": "Electron App + Renderer: Server Executable (Build Angular)",
+      "configurations": ["Electron App: Server Executable", "Renderer"],
       "preLaunchTask": "Build Angular App",
       "stopAll": true
     }

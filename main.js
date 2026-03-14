@@ -44,13 +44,12 @@ let portMatch;
 let serverProcess;
 
 const startServer = () => {
-  const command = useScript
-    ? 'python -m server'
-    : path.join(__dirname, 'deployment', 'ElectronServer', 'ElectronServer.exe');
-
-  // Spawn the Python process, passing data as a command-line argument
-  const args = ['server'];
-  serverProcess = spawn(command, args);
+  if (useScript) {
+    serverProcess = spawn('python', ['-m', 'server', 'server']);
+  } else {
+    const exePath = path.join(__dirname, 'deployment', 'ElectronServer', 'ElectronServer.exe');
+    serverProcess = spawn(exePath, ['server']);
+  }
 
   serverProcess.stdout.on('data', (data) => {
     output = data.toString().trim();
@@ -68,7 +67,7 @@ const startServer = () => {
     log.error(`Python error: ${output}`);
 
     // Find the port the server is listening on
-    const portRegex = /^.*?Listening on port (?<port>\d+)\.\.\./;
+    const portRegex = /^.*?Listening on port (?<port>\d+)\.\.\./gm;
     portMatch = portMatch ?? portRegex.exec(output);
     startApp();
   });
