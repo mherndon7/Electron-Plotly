@@ -2,6 +2,7 @@ const { app, BrowserWindow, session } = require('electron');
 const log = require('electron-log');
 const path = require('path');
 const spawn = require('child_process').execFile;
+const find = require('find-process');
 
 // Custom log format to include timestamp and log level
 function logFormat(data) {
@@ -30,6 +31,9 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 
+// Launch server from python script
+const useScript = process.argv.includes('script');
+
 // Development vs Production URL
 const isDevelopment = process.argv.includes('development');
 let port = isDevelopment ? 4200 : 8080;
@@ -39,10 +43,14 @@ let cookieMatch;
 let portMatch;
 let serverProcess;
 
-const startScript = () => {
+const startServer = () => {
+  const command = useScript
+    ? 'python -m server'
+    : path.join(__dirname, 'deployment', 'ElectronServer', 'ElectronServer.exe');
+
   // Spawn the Python process, passing data as a command-line argument
-  const args = ['-m', 'server', 'server'];
-  serverProcess = spawn('python', args);
+  const args = ['server'];
+  serverProcess = spawn(command, args);
 
   serverProcess.stdout.on('data', (data) => {
     output = data.toString().trim();
@@ -128,12 +136,20 @@ const createWindow = (name, value) => {
 
 app.whenReady().then(() => {
   log.info('Starting Electron app');
-  startScript();
+  startServer();
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
   log.info('App is about to quit, performing cleanup');
   if (serverProcess) serverProcess.kill();
+
+  if (!useScript) {
+    const processes = await find('name', 'ElectronServer');
+    processes.forEach((proc) => {
+      log.debug(`Killing process ${proc.pid}`);
+      process.kill(proc.pid);
+    });
+  }
 });
 
 app.on('will-quit', () => {

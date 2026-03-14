@@ -24,7 +24,7 @@ def get_log_path() -> Path:
 def get_index_path() -> Path:
     """Path to the deployed `index.html` file."""
     return (
-        Path(sys.executable).parent.parent
+        Path(sys.executable).parent.parent.parent
         / "dist"
         / "electron-app"
         / "browser"
@@ -59,6 +59,7 @@ class ServerApplication(tornado.web.Application):
 
     def _handlers(self):
         index_file = get_index_path()
+        logger.debug(f"Index file path: {index_file}")
         return [
             (r"/cookie", CookieHandler),
             (
