@@ -4,6 +4,15 @@ const path = require('path');
 const spawn = require('child_process').execFile;
 const find = require('find-process');
 
+// Launch server from python script
+const useScript = process.argv.includes('script');
+
+// Development vs Production URL
+const electronIsDev = path.basename(app.getPath('exe')) === 'electron.exe';
+const isDevelopment = process.argv.includes('development');
+let port = isDevelopment ? 4200 : 8080;
+const createUrl = () => `http://localhost:${port}`;
+
 // Custom log format to include timestamp and log level
 function logFormat(data) {
   const date = new Date();
@@ -18,7 +27,10 @@ function logFormat(data) {
 }
 
 log.initialize();
-log.transports.file.resolvePathFn = () => path.join(__dirname, 'electron-log.log');
+log.transports.file.resolvePathFn = () =>
+  electronIsDev
+    ? path.join(__dirname, 'electron-log.log')
+    : path.join(__dirname, '..', '..', '..', '..', 'electron-log.log');
 log.transports.file.format = logFormat;
 log.transports.console.format = logFormat;
 
@@ -31,14 +43,6 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 
-// Launch server from python script
-const useScript = process.argv.includes('script');
-
-// Development vs Production URL
-const isDevelopment = process.argv.includes('development');
-let port = isDevelopment ? 4200 : 8080;
-const createUrl = () => `http://localhost:${port}`;
-
 let cookieMatch;
 let portMatch;
 let serverProcess;
@@ -47,7 +51,13 @@ const startServer = () => {
   if (useScript) {
     serverProcess = spawn('python', ['-m', 'server', 'server']);
   } else {
-    const exePath = path.join(__dirname, 'deployment', 'ElectronServer', 'ElectronServer.exe');
+    let exePath;
+    if (electronIsDev) {
+      exePath = path.join(__dirname, 'deployment', 'ElectronServer', 'ElectronServer.exe');
+    } else {
+      exePath = path.join(app.getAppPath(), '..', '..', 'extras', 'ElectronServer.exe');
+    }
+    log.debug(`Executable Path: ${exePath}`);
     serverProcess = spawn(exePath, ['server']);
   }
 

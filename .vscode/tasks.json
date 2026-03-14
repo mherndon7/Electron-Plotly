@@ -44,7 +44,7 @@
       "script": "build",
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       },
       "problemMatcher": []
     },
@@ -62,7 +62,11 @@
         "deployment/serverBuild",
         "--noconfirm"
       ],
-      "dependsOn": ["Delete Server Build"]
+      "dependsOn": ["Delete Server Build"],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Build Electron App",
@@ -86,6 +90,11 @@
       "command": "IF EXIST ${workspaceFolder}\\deployment\\ElectronServer RD /s /q ${workspaceFolder}\\deployment\\ElectronServer"
     },
     {
+      "label": "Delete App Build",
+      "type": "shell",
+      "command": "IF EXIST ${workspaceFolder}\\deployment\\ElectronApp RD /s /q ${workspaceFolder}\\deployment\\ElectronApp"
+    },
+    {
       "label": "end ng serve",
       "type": "process",
       "command": ["${command:workbench.action.tasks.terminate}"],
@@ -94,6 +103,15 @@
         "close": true // Close the terminal when the task finishes
       },
       "dependsOn": ["npm: start"]
+    },
+    {
+      "label": "Full Build",
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": ["Build Angular App", "Build Server", "Delete App Build", "Build Electron App"]
     }
   ]
 }

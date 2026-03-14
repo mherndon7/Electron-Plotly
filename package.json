@@ -14,17 +14,33 @@
   "build": {
     "appId": "com.electron-plotly.app",
     "files": [
-      "index.html",
-      "dist/**/*",
+      "deployment/dist/**/*",
       "main.js",
       "package.json"
     ],
+    "extraFiles": [
+      {
+        "from": "deployment/ElectronServer",
+        "to": "extras",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "deployment/dist",
+        "to": "extras/ui",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "directories": {
-      "output": "dist-electron",
+      "output": "deployment/ElectronApp",
       "buildResources": "build"
     },
     "win": {
       "target": [
+        "zip",
         "nsis"
       ]
     },

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def get_log_path() -> Path:
     """Path for the server log file."""
     return (
-        Path(sys.executable).parent
+        Path(sys.executable).parent.parent.parent.parent
         if getattr(sys, "frozen", False)
         else Path(__file__).parent.parent.parent
     )
@@ -24,16 +24,12 @@ def get_log_path() -> Path:
 def get_index_path() -> Path:
     """Path to the deployed `index.html` file."""
     return (
-        Path(sys.executable).parent.parent.parent
-        / "dist"
-        / "electron-app"
-        / "browser"
-        / "index.html"
+        Path(sys.executable).parent / "ui" / "browser" / "index.html"
         if getattr(sys, "frozen", False)
         else (
             Path(__file__).parent.parent.parent
+            / "deployment"
             / "dist"
-            / "electron-app"
             / "browser"
             / "index.html"
         )
