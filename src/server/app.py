@@ -81,15 +81,19 @@ async def start_server(
     developer_mode: bool = False,
 ):
     setup_module_logger("server", get_log_path())
-    app = ServerApplication(
-        cookie_name,
-        cookie_value,
-        cookie_secret,
-        private_pem,
-        developer_mode,
-    )
+    try:
+        app = ServerApplication(
+            cookie_name,
+            cookie_value,
+            cookie_secret,
+            private_pem,
+            developer_mode,
+        )
 
-    logger.info("Listening on port 8888...")
-    app.listen(8888)
+        logger.info("Listening on port 8888...")
+        app.listen(8888)
 
-    await asyncio.Event().wait()
+        await asyncio.Event().wait()
+    except BaseException as exc:
+        logger.exception(exc)
+        raise exc
