@@ -79,23 +79,18 @@ const startServer = () => {
 };
 
 const startApp = () => {
-  if ((isDevelopment && !cookieMatch) || !portMatch || BrowserWindow.getAllWindows().length > 0)
-    return;
+  if (!cookieMatch || !portMatch || BrowserWindow.getAllWindows().length > 0) return;
 
   log.debug(`Cookie Name: ${cookieMatch.groups.cookie_name}`);
   log.debug(`Cookie Value: ${cookieMatch.groups.cookie_value}`);
   port = portMatch.groups.port;
 
-  // Create window without cookies and server in development mode
-  if (isDevelopment) createWindow();
-  else {
-    createWindow(cookieMatch.groups.cookie_name, cookieMatch.groups.cookie_value);
+  createWindow(cookieMatch.groups.cookie_name, cookieMatch.groups.cookie_value);
 
-    session.defaultSession.cookies
-      .get({ url: createUrl() })
-      .then((cookies) => log.info('Cookies retrieved:', cookies))
-      .catch((error) => log.info(error));
-  }
+  session.defaultSession.cookies
+    .get({ url: createUrl() })
+    .then((cookies) => log.info('Cookies retrieved:', cookies))
+    .catch((error) => log.info(error));
 };
 
 let mainWindow;
@@ -136,7 +131,10 @@ const createWindow = (name, value) => {
 
 app.whenReady().then(() => {
   log.info('Starting Electron app');
-  startServer();
+
+  // Create window without cookies and server in development mode
+  if (isDevelopment) createWindow();
+  else startServer();
 });
 
 app.on('before-quit', async () => {
