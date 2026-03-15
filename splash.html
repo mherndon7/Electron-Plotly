@@ -77,7 +77,7 @@
     <div class="content">
       <img class="app-icon" src="public/favicon.ico" alt="Logo" />
       <div class="app-name">Electron App</div>
-      <div class="app-version">Version 2.1.0</div>
+      <div class="app-version" id="app-version">Loading...</div>
     </div>
 
     <div class="footer">
@@ -93,6 +93,10 @@
       ipcRenderer.on('progress-update', (event, { label, percent }) => {
         document.getElementById('status-text').innerText = label;
         document.getElementById('progress-fill').style.width = percent + '%';
+      });
+
+      ipcRenderer.on('app-version', (_event, { version }) => {
+        const display = (document.getElementById('app-version').innerText = `Version ${version}`);
       });
     </script>
   </body>

@@ -116,6 +116,20 @@ const createSplash = () => {
     },
   });
   splashWindow.loadFile('splash.html');
+
+  splashWindow.webContents.send('app-version', { version: app.getVersion() });
+
+  // Mock progress updates for the splash screen
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    splashWindow.webContents.send('progress-update', {
+      label: progress < 100 ? 'Loading Assets...' : 'Starting App...',
+      percent: progress,
+    });
+
+    if (progress >= 100) clearInterval(interval);
+  }, 150);
 };
 
 let mainWindow;
@@ -166,18 +180,8 @@ const createWindow = (name, value) => {
 
 app.whenReady().then(() => {
   log.info('Starting Electron app');
-  createSplash();
-  // Mock progress updates for the splash screen
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    splashWindow.webContents.send('progress-update', {
-      label: progress < 100 ? 'Loading Assets...' : 'Starting App...',
-      percent: progress,
-    });
 
-    if (progress >= 100) clearInterval(interval);
-  }, 150);
+  createSplash();
 
   // Create window without cookies and server in development mode
   if (isDevelopment) createWindow();
