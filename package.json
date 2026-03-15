@@ -15,6 +15,8 @@
     "appId": "com.electron-plotly.app",
     "files": [
       "deployment/dist/**/*",
+      "public/favicon.ico",
+      "splash.html",
       "main.js",
       "package.json"
     ],
