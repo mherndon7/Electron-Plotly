@@ -90,7 +90,7 @@
     <script>
       // Placeholder for Electron IPC communication
       const { ipcRenderer } = require('electron');
-      ipcRenderer.on('progress', (event, { label, percent }) => {
+      ipcRenderer.on('progress-update', (event, { label, percent }) => {
         document.getElementById('status-text').innerText = label;
         document.getElementById('progress-fill').style.width = percent + '%';
       });
