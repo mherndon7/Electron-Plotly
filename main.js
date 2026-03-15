@@ -83,6 +83,7 @@ const startServer = () => {
 
   serverProcess.on('close', (code) => {
     log.info(`Python process exited with code ${code}`);
+    if (mainWindow) app.quit();
   });
 };
 
