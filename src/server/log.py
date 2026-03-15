@@ -5,6 +5,8 @@ AETHER Root Logging controller. Provides root logger and instances for module lo
 import logging
 from os.path import exists, getsize, join
 
+import click
+
 DEFAULT_FORMAT = logging.Formatter(
     "%(asctime)s [%(levelname)s] %(message)s",
     "%Y-%m-%d %H:%M:%S",
@@ -16,6 +18,10 @@ VERBOSE_FORMAT = logging.Formatter(
 
 CLIENT_LOG = "client_log.txt"
 SERVER_LOG = "server_log.txt"
+
+
+def log_splash_status(progress: int, text: str) -> None:
+    click.echo(f"STATUS::{progress}::{text}::END_STATUS")
 
 
 def setup_module_logger(module_name, log_dir=None, log_file=SERVER_LOG, verbose=True):

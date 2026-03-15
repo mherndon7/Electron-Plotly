@@ -4,6 +4,7 @@ import click
 
 from .app import start_server
 from .authentication import create_private_pem, generate_keypair, get_signed_cookie
+from .log import log_splash_status
 
 
 @click.group()
@@ -26,6 +27,7 @@ def cli():
     help="Generate a cookie for development purposes.",
 )
 def server(cookie_name: str, developer_mode: bool):
+
     _, private_key, cookie_secret = generate_keypair()
     if developer_mode:
         cookie_secret = "development_cookie_secret"
@@ -39,6 +41,8 @@ def server(cookie_name: str, developer_mode: bool):
         f" cookie secret {cookie_secret},"
         f" and cookie value: {cookie_value}"
     )
+    log_splash_status(10, "Starting server...")
+
     asyncio.run(
         start_server(
             cookie_name,

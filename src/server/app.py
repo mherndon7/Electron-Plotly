@@ -5,7 +5,7 @@ from pathlib import Path
 
 import tornado
 
-from server.log import setup_module_logger
+from server.log import log_splash_status, setup_module_logger
 
 from .handlers import CookieHandler, StaticFileHandler
 
@@ -54,6 +54,8 @@ class ServerApplication(tornado.web.Application):
         super().__init__(self._handlers(), cookie_secret=user_secret)
 
     def _handlers(self):
+        log_splash_status(70, "Setting up routes...")
+
         index_file = get_index_path()
         logger.debug(f"Index file path: {index_file}")
         return [
@@ -85,10 +87,12 @@ async def start_server(
             private_pem,
             developer_mode,
         )
+        log_splash_status(90, "Starting app...")
 
         logger.info("Listening on port 8888...")
         app.listen(8888)
 
+        log_splash_status(100, "Finished!")
         await asyncio.Event().wait()
     except BaseException as exc:
         logger.exception(exc)

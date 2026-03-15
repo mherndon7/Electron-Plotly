@@ -45,6 +45,7 @@ app.commandLine.appendSwitch('enable-gpu-rasterization');
 let cookieMatch;
 let portMatch;
 let serverProcess;
+let statuses = [{ percent: 0, label: 'Initializing...' }];
 
 const startServer = () => {
   if (useScript) {
@@ -61,18 +62,24 @@ const startServer = () => {
   }
 
   serverProcess.stdout.on('data', (data) => {
-    output = data.toString().trim();
+    const output = data.toString().trim();
     log.info(`Python output: ${output}`);
 
     // Split the value to extract the cookie name and value
     const cookieRegex = /^Cookie::(?<cookie_name>[^:]+)::(?<cookie_value>.*)$/gm;
     cookieMatch = cookieMatch ?? cookieRegex.exec(output);
 
+    // Find splashscreen status
+    statusRegex = /STATUS::(?<percent>.*?)::(?<label>.*)::END_STATUS/gm;
+    for (const match of output.matchAll(statusRegex)) {
+      statuses.push({ percent: match.groups.percent, label: match.groups.label });
+    }
+
     startApp();
   });
 
   serverProcess.stderr.on('data', (data) => {
-    output = data.toString().trim();
+    const output = data.toString().trim();
     log.error(`Python error: ${output}`);
 
     // Find the port the server is listening on
@@ -120,16 +127,14 @@ const createSplash = () => {
   splashWindow.webContents.send('app-version', { version: app.getVersion() });
 
   // Mock progress updates for the splash screen
-  let progress = 0;
+  let updateIndex = -1;
   const interval = setInterval(() => {
-    progress += 10;
-    splashWindow.webContents.send('progress-update', {
-      label: progress < 100 ? 'Loading Assets...' : 'Starting App...',
-      percent: progress,
-    });
+    updateIndex = Math.min(++updateIndex, statuses.length - 1);
+    const status = statuses[updateIndex];
+    splashWindow.webContents.send('progress-update', status);
 
-    if (progress >= 100) clearInterval(interval);
-  }, 150);
+    if (status.percent >= 100) clearInterval(interval);
+  }, 300);
 };
 
 let mainWindow;
@@ -165,10 +170,15 @@ const createWindow = (name, value) => {
 
   // Show main window and close splash once content is ready
   mainWindow.once('ready-to-show', () => {
-    // Optional: Add a slight delay so the user can actually see the splash
+    // Add a slight delay so the user can actually see the splash
     setTimeout(() => {
-      splashWindow.destroy();
-      mainWindow.show();
+      const interval = setInterval(() => {
+        if (statuses.at(-1).percent >= 100) {
+          splashWindow.destroy();
+          mainWindow.show();
+          clearInterval(interval);
+        }
+      }, 150);
     }, 2000);
   });
 
@@ -180,7 +190,6 @@ const createWindow = (name, value) => {
 
 app.whenReady().then(() => {
   log.info('Starting Electron app');
-
   createSplash();
 
   // Create window without cookies and server in development mode
