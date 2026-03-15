@@ -88,7 +88,7 @@ const startServer = () => {
 };
 
 const startApp = () => {
-  if (!cookieMatch || !portMatch || BrowserWindow.getAllWindows().length > 0) return;
+  if (!cookieMatch || !portMatch || (mainWindow && !mainWindow.isDestroyed())) return;
 
   log.debug(`Cookie Name: ${cookieMatch.groups.cookie_name}`);
   log.debug(`Cookie Value: ${cookieMatch.groups.cookie_value}`);
@@ -102,11 +102,28 @@ const startApp = () => {
     .catch((error) => log.info(error));
 };
 
+let splashWindow;
+const createSplash = () => {
+  splashWindow = new BrowserWindow({
+    width: 500,
+    height: 350,
+    transparent: true, // Requires a transparent background in CSS
+    frame: false, // Removes window controls for a clean look
+    alwaysOnTop: true, // Ensures it's not hidden by other apps
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  splashWindow.loadFile('splash.html');
+};
+
 let mainWindow;
 const createWindow = (name, value) => {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    show: false, // Don't show until ready
     // autoHideMenuBar: true,
   });
 
@@ -132,6 +149,15 @@ const createWindow = (name, value) => {
       .catch((error) => console.error(error));
   }
 
+  // Show main window and close splash once content is ready
+  mainWindow.once('ready-to-show', () => {
+    // Optional: Add a slight delay so the user can actually see the splash
+    setTimeout(() => {
+      splashWindow.destroy();
+      mainWindow.show();
+    }, 2000);
+  });
+
   mainWindow.on('closed', () => {
     mainWindow.removeAllListeners('close');
     mainWindow = null;
@@ -140,6 +166,18 @@ const createWindow = (name, value) => {
 
 app.whenReady().then(() => {
   log.info('Starting Electron app');
+  createSplash();
+  // Mock progress updates for the splash screen
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    splashWindow.webContents.send('progress-update', {
+      label: progress < 100 ? 'Loading Assets...' : 'Starting App...',
+      percent: progress,
+    });
+
+    if (progress >= 100) clearInterval(interval);
+  }, 150);
 
   // Create window without cookies and server in development mode
   if (isDevelopment) createWindow();
