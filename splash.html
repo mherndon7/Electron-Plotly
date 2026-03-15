@@ -4,14 +4,21 @@
     <style>
       body,
       html {
+        --background: #121212;
+        --primary: #15794a;
+        --text_on_surface: #ffffff;
+        --text_faded: #bbbbbbd8;
+
         margin: 0;
         padding: 0;
         height: 100%;
         width: 100%;
+        font-size: 62.5%;
+        --font-size: 1.6rem;
         font-family:
           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background-color: #1e1e1e; /* Darker, modern background */
-        color: #ffffff;
+        background-color: var(--background);
+        color: var(--text_on_surface);
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -28,47 +35,46 @@
       }
 
       .app-icon {
-        width: 96px;
-        height: 96px;
-        margin-bottom: 16px;
+        width: 9.6rem;
+        height: 9.6rem;
+        margin-bottom: 1.6rem;
         filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
       }
 
       .app-name {
-        font-size: 22px;
+        font-size: 2.2rem;
         font-weight: 600;
         letter-spacing: 0.5px;
       }
 
       .app-version {
-        font-size: 12px;
+        font-size: 1.2rem;
         opacity: 0.5;
-        margin-top: 4px;
+        margin-top: 0.4rem;
       }
 
-      /* Bottom Section */
       .footer {
         width: 100%;
       }
 
       .status-label {
-        font-size: 11px;
-        padding: 0 15px 8px 15px; /* Left aligned padding */
+        font-size: 1.1rem;
+        padding: 0 1.5rem 0.8rem 1.5rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: #888;
+        color: var(--text_faded);
       }
 
       .progress-container {
         width: 100%;
-        height: 4px; /* Thin, modern bar */
+        height: 5px; /* Thin, modern bar */
         background: rgba(255, 255, 255, 0.1);
       }
 
       #progress-fill {
-        width: 20%; /* Example start */
+        width: 20%;
         height: 100%;
-        background: #0078d4; /* Standard accent blue */
+        background: var(--primary);
         transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
     </style>
