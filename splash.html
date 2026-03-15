@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #1e1e1e; /* Darker, modern background */
+        color: #ffffff;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        -webkit-app-region: drag;
+      }
+
+      /* Center Content */
+      .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .app-icon {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 16px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      }
+
+      .app-name {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .app-version {
+        font-size: 12px;
+        opacity: 0.5;
+        margin-top: 4px;
+      }
+
+      /* Bottom Section */
+      .footer {
+        width: 100%;
+      }
+
+      .status-label {
+        font-size: 11px;
+        padding: 0 15px 8px 15px; /* Left aligned padding */
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #888;
+      }
+
+      .progress-container {
+        width: 100%;
+        height: 4px; /* Thin, modern bar */
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      #progress-fill {
+        width: 20%; /* Example start */
+        height: 100%;
+        background: #0078d4; /* Standard accent blue */
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <img class="app-icon" src="public/favicon.ico" alt="Logo" />
+      <div class="app-name">Electron App</div>
+      <div class="app-version">Version 2.1.0</div>
+    </div>
+
+    <div class="footer">
+      <div class="status-label" id="status-text">Starting Services...</div>
+      <div class="progress-container">
+        <div id="progress-fill"></div>
+      </div>
+    </div>
+
+    <script>
+      // Placeholder for Electron IPC communication
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.on('progress', (event, { label, percent }) => {
+        document.getElementById('status-text').innerText = label;
+        document.getElementById('progress-fill').style.width = percent + '%';
+      });
+    </script>
+  </body>
+</html>
